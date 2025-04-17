@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Takvim</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff3f7;
+      color: #880e4f;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #controls {
+      margin-bottom: 20px;
+    }
+    select {
+      padding: 8px;
+      font-size: 16px;
+      margin: 0 10px;
+    }
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .day {
+      background-color: #fce4ec;
+      padding: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .day.has-note {
+      background-color: #f8bbd0;
+      font-weight: bold;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+    .modal-content textarea {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+    .modal-content input[type="file"] {
+      margin-bottom: 10px;
+    }
+    .close-btn {
+      background-color: #ec407a;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bizim Takvimimiz</h1>
+  <p>Bir güne tıklayarak not ve fotoğraf ekleyebilirsin 💕</p>
+
+  <div id="controls">
+    <select id="month-select"></select>
+    <select id="year-select"></select>
+  </div>
+
+  <div id="calendar"></div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h3 id="selected-day"></h3>
+      <textarea id="note-input" placeholder="Bugüne dair bir not yaz..."></textarea>
+      <input type="file" id="photo-input" accept="image/*">
+      <button class="close-btn" onclick="closeModal()">Kaydet ve Kapat</button>
+    </div>
+  </div>
+
+  <script>
+    const calendar = document.getElementById('calendar');
+    const modal = document.getElementById('modal');
+    const selectedDayText = document.getElementById('selected-day');
+    const noteInput = document.getElementById('note-input');
+    const photoInput = document.getElementById('photo-input');
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+
+    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+    const currentDate = new Date();
+    let selectedMonth = currentDate.getMonth();
+    let selectedYear = currentDate.getFullYear();
+    let selectedDay = null;
+    let notes = {};
+
+    function populateSelectors() {
+      for (let i = 0; i < 12; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = monthNames[i];
+        if (i === selectedMonth) option.selected = true;
+        monthSelect.appendChild(option);
+      }
+
+      for (let y = selectedYear - 5; y <= selectedYear + 5; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        if (y === selectedYear) option.selected = true;
+        yearSelect.appendChild(option);
+      }
+    }
+
+    function generateCalendar(month, year) {
+      calendar.innerHTML = '';
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        calendar.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+        if (notes[dateKey] && (notes[dateKey].note.trim() !== '' || notes[dateKey].photo)) {
+          dayDiv.classList.add('has-note');
+        }
+        dayDiv.textContent = `${day} ${monthNames[month]}`;
+        dayDiv.onclick = () => openModal(day, month, year);
+        calendar.appendChild(dayDiv);
+      }
+    }
+
+    function openModal(day, month, year) {
+      selectedDay = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      selectedDayText.textContent = `${day} ${monthNames[month]} ${year}`;
+      noteInput.value = notes[selectedDay]?.note || '';
+      photoInput.value = '';
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      const note = noteInput.value.trim();
+      const hasPhoto = photoInput.files.length > 0;
+
+      if (note || hasPhoto) {
+        notes[selectedDay] = {
+          note,
+          photo: hasPhoto ? photoInput.files[0].name : notes[selectedDay]?.photo || ''
+        };
+      } else {
+        delete notes[selectedDay];
+      }
+
+      modal.style.display = 'none';
+      generateCalendar(selectedMonth, selectedYear);
+    }
+
+    monthSelect.addEventListener('change', () => {
+      selectedMonth = parseInt(monthSelect.value);
+      generateCalendar(selectedMonth, selectedYear);
+    });
+
+    yearSelect.addEventListener('change', () => {
+      selectedYear = parseInt(yearSelect.value);
+      generateCalendar(selectedMonth, selectedYear);
+    });
+
+    populateSelectors();
+    generateCalendar(selectedMonth, selectedYear);
+  </script>
+</body>
+</html>

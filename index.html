@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Senin Hakkında Sevdiğim Şeyler</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #fce4ec;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      color: #880e4f;
+    }
+    h1 {
+      margin: 0 20px 20px;
+      font-size: 2rem;
+    }
+    img {
+      max-width: 300px;
+      border-radius: 20px;
+      margin-top: 20px;
+    }
+    iframe {
+      margin-top: 20px;
+      border: none;
+    }
+    #password-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #site-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    input[type="password"] {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 25px;
+      font-size: 30px;
+      border-radius: 50%;
+      background-color: #ec407a;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #error {
+      margin-top: 10px;
+      color: #d50000;
+    }
+    #menu-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 30px;
+      cursor: pointer;
+    }
+    #dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    #dropdown-menu a {
+      display: block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #880e4f;
+      font-size: 16px;
+    }
+    #dropdown-menu a:hover {
+      background-color: #fce4ec;
+    }
+  </style>
+</head>
+<body>
+  <div id="password-container">
+    <h1>Şifreyi gir aşkım 💖</h1>
+    <input type="password" id="password" placeholder="Şifre">
+    <button onclick="checkPassword()">Giriş yap</button>
+    <div id="error"></div>
+  </div>
+
+  <div id="site-container">
+    <button id="menu-button" onclick="toggleMenu()">☰</button>
+    <div id="dropdown-menu">
+      <a href="#">Sıkça Sorulan Sorular</a>
+      <a href="takvim.html">Takvim</a>
+    </div>
+    <h1 id="reason"></h1>
+    <img id="photo" src="" alt="" style="display: none;" />
+    <iframe id="music" width="300" height="170" style="display: none;"></iframe>
+    <button onclick="showRandomReason()">💗</button>
+  </div>
+
+  <script>
+    const data = [
+      { reason: "1. Her anımda yanımda olman" }, 
+      { reason: "2. İstediğimiz her şeyi beraber yapabiliyor olmamız." },
+      { reason: "3. Bu şarkı gibi hissettiriyor olman.",  music: "https://www.youtube.com/watch?v=XFvSd1HDagY" },
+      { reason: "4. Az da olsa beraber yaptığımız geziler." },
+      { reason: "5. En kötü zamanlarda bile beraber oluşumuz." },
+      { reason: "6. Her düştüğümüzde birbirimize destek oluşumuz." },
+      { reason: "7. Her gün yaptığımız iyi geceler rutinimiz." },
+      { reason: "8. Beraber amaçsızca yürüyüşlerimiz." },
+      { reason: "9. Beraber bir şeyler keşfedişimiz." },
+      { reason: "10. Beraber her şeye gülebilişimiz." },
+      { reason: "11. Gülüşün." },
+      { reason: "12. Bana bakışın." },
+      { reason: "13. En ufak şeye tatlı tatlı tepkilerin." },
+      { reason: "14. Bitmek bilmeyen hapşuruşların." },
+      { reason: "15. Girerkenki yüz ifaden." },
+      { reason: "16. İnlemen." },
+      { reason: "17. Küçük başarılarımızı bile kutlamamız." },
+      { reason: "18. Bana tüm vücudunla sarılışın." },
+      { reason: "19. Başını omzuma koyuşun." },
+      { reason: "20. Özellikle kolumun tadına bakman." },
+      { reason: "21. Öpüşün." },
+      { reason: "22. Öpülüşün." },
+      { reason: "23. Anılarımı ya da anlattıklarımı can kulağıyla dinleyişin." },
+      { reason: "24. Aramızda şehirler olduğunda bile yanında hissetmem." },
+      { reason: "25. Teoman konserimiz." },
+      { reason: "26. Sürekli durum bildirimi yapman." },
+      { reason: "27. Yanında çocuklaşabilmem." },
+      { reason: "28. Beni her anlamda konforlu hissettirmen." },
+      { reason: "29. En ufak şeyi etkinlik haline getirişimiz." },
+      { reason: "30. Wordle ve GeoGuesser geleneğimiz." },
+      { reason: "31. Latife datelerimiz." },
+      { reason: "32. 17. doğum günün." },
+      { reason: "33. Aşkım oluşun." },
+      { reason: "34. Çakır halin." },
+      { reason: "35. Alakasız yetenek ve funfactlerimden etkilenmen." },
+      { reason: "36. Yaptığım şakaları anında anlaman." },
+      { reason: "37. Beraber film izleyişimiz." },
+      { reason: "38. Benim önerilerime şans vermen." },
+      { reason: "39. Letterboxd yorumların." },
+      { reason: "40. Dokunuşun." },
+      { reason: "41. Tatlı tatlı konuşuşun." },
+      { reason: "42. Söylediklerimi aklında tutman." },
+      { reason: "43. Anlattıklarımı kaçıncıya anlatırsam anlatayım ilk seferki gibi dinlemen." },
+      { reason: "44. Beni her anlamda motive edişin." },
+      { reason: "45. Bu siteyi yapmama sebep oluşun." },
+      { reason: "46. Bu madde geldiğindeki gülüşün." },
+      { reason: "47. Kurduğumuz hayaller." },
+      { reason: "48. Beraber denemek istediğimiz şeyler." },
+      { reason: "49. Büyük küçük planlar yapmamız." },
+      { reason: "50. Gelecekle ilgili her şeyimizi beraber planlamamız." },
+      { reason: "51. İltifatlarıma tepkin." },
+      { reason: "52. Yanımda hep en doğal halin olman." },
+      { reason: "53. Seni seviyorum diyişin." },
+      { reason: "54. Sana bitişik yaşamayı istememe sebep olman." },
+      { reason: "55. Tepkini düşünmemin bile uykumun kaçmasına yetmesi." },
+      { reason: "56. Her halinle aşkım oluşun." },
+      { reason: "57. Şifre denemelerin." },
+      { reason: "58. Hem ortak hem de tamamen zıt özelliklerimizin oluşu." },
+      { reason: "59. Beni her halimle sevişin." },
+      { reason: "60. Seni her gün dünden daha çok seviyor olmam." },
+      { reason: "61. Her şeyini anlatman." },
+      { reason: "62. Beni çok iyi tanıyor oluşun." },
+      { reason: "63. Beraber Ankara’yı düşlememiz." },
+      { reason: "64. Sınav senemizde bile birbirimize bu kadar zaman ayırabilmemiz." },
+      { reason: "65. Keşfet saatimiz." },
+      { reason: "66. Hiçbir zıt görüşümüzün sorun çıkarmamış olması." },
+      { reason: "67. Beni bunları yazarken duygulandırışın." },
+      { reason: "68. Mezuniyet için tatlı tatlı heyecanlanman." },
+      { reason: "69. Beraber saatlerce ders çalışmamız." },
+      { reason: "70. Elbiseli halin." } ,
+      { reason: "71. Elbisesiz halin." },
+      { reason: "72. Beraber lego yapışımız." }
+   ];
+
+    let shownReasons = [];
+
+    function showRandomReason() {
+      if (shownReasons.length === data.length) {
+        shownReasons = [];
+      }
+
+      let item;
+      do {
+        item = data[Math.floor(Math.random() * data.length)];
+      } while (shownReasons.includes(item.reason));
+
+      shownReasons.push(item.reason);
+
+      document.getElementById("reason").textContent = item.reason;
+
+      const photo = document.getElementById("photo");
+      if (item.photo) {
+        photo.src = item.photo;
+        photo.style.display = 'block';
+      } else {
+        photo.style.display = 'none';
+      }
+
+      const music = document.getElementById("music");
+      if (item.music) {
+        music.src = item.music;
+        music.style.display = 'block';
+      } else {
+        music.style.display = 'none';
+        music.src = "";
+      }
+    }
+
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      if (input === "18042023") {
+        document.getElementById("password-container").style.display = "none";
+        document.getElementById("site-container").style.display = "flex";
+        document.getElementById("reason").textContent = "";
+      } else {
+        document.getElementById("error").textContent = "Aşkım şifreyi ben koydum, ne kadar zor olabilir ki?";
+      }
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById("dropdown-menu");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+  </script>
+</body>
+</html>
